@@ -3,6 +3,7 @@ import re
 
 import discord
 import logging
+from discord.ext import commands
 from config.discord import *
 from connectors.connector_common import *
 from storage.discord import DiscordTrainingDataManager
@@ -25,7 +26,10 @@ class DiscordReplyGenerator(ConnectorReplyGenerator):
             # Remove URLs
             reply = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', reply)
             reply = reply.strip()
-
+        if EMOTES_SKIP:
+            # Strips discord emotes
+            reply = re.sub(r'<(a?):([A-Za-z0-9_]+):([0-9]+)>', '', reply)
+            reply = reply.strip()
         if len(reply) > 0:
             return reply
         else:
@@ -33,8 +37,9 @@ class DiscordReplyGenerator(ConnectorReplyGenerator):
 
 
 class DiscordClient(discord.Client):
+
     def __init__(self, worker: 'DiscordWorker'):
-        discord.Client.__init__(self)
+        discord.Client.__init__(self, activity=discord.Game(name="My reality", type=3), status=discord.Status.dnd)
         self._worker = worker
         self._ready.set()
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -42,7 +47,7 @@ class DiscordClient(discord.Client):
     async def on_ready(self):
         self._ready.set()
         self._logger.info(
-            "Server join URL: https://discordapp.com/oauth2/authorize?&client_id=%d&scope=bot&permissions=0"
+            "Server join URL: https://discord.com/oauth2/authorize?&client_id=%d&scope=bot&permissions=379968"
             % DISCORD_CLIENT_ID)
         print('--------')
         print('--------')
@@ -56,11 +61,17 @@ class DiscordClient(discord.Client):
         print('--------')
 
     async def on_message(self, message: discord.Message):
-        # Prevent feedback loop
-        if str(message.author) == DISCORD_USERNAME or message.author.bot or message.attachments:
+        # Ignore attachements and Feedback Loop
+        if message.attachments or message.author.bot:
             return
 
         filtered_content = DiscordHelper.filter_content(message)
+
+        # Ignore empty and letter messages
+        if not len(filtered_content) > 2:
+            return
+        if filtered_content == '':
+            return
 
         learn = False
         # Learn from private messages
@@ -72,17 +83,27 @@ class DiscordClient(discord.Client):
             if str(message.channel) not in DISCORD_LEARN_CHANNEL_EXCEPTIONS:
                 DiscordTrainingDataManager().store(message)
                 learn = True
-        # Learn from User
+        # Learn will accept new input from specified channel and neglect specified user
+        elif str(message.channel) in DISCORD_LEARN_CHANNEL and message.content is not None:
+            if str(message.author) in DISCORD_NEGLECT_LEARN:
+                return
+            else:
+                DiscordTrainingDataManager().store(message)
+                learn = True
+        # Learn from Specific User
         elif str(message.author) == DISCORD_LEARN_FROM_USER:
             DiscordTrainingDataManager().store(message)
             learn = True
-
-        # real-time learning
+        # Real-time learning
         if learn:
             self._worker.send(ConnectorRecvMessage(filtered_content, learn=True, reply=False))
             self._worker.recv()
 
+
+        # This pulls from discord config, just the embed footer for gags
+        TALKING_VARIANT = random.choice(TALKING_TO)
         # Reply to mentions
+        # Typically has embeds so be sure to enable the embed permission across all channels
         for mention in message.mentions:
             if str(mention) == DISCORD_USERNAME:
                 self._logger.debug("Message: %s" % filtered_content)
@@ -90,19 +111,52 @@ class DiscordClient(discord.Client):
                 reply = self._worker.recv()
                 self._logger.debug("Reply: %s" % reply)
                 if reply is not None:
-                    await message.channel.send(reply)
+                    embed = discord.Embed(description=reply, color=message.author.color)
+                    embed.set_footer(text = TALKING_VARIANT + message.author.name, icon_url = message.author.avatar_url)
+                    embed.timestamp = datetime.utcnow()
+                    await asyncio.sleep(0.25)
+                    await message.channel.send(embed=embed)
                 return
 
-        # Reply to private messages
-        if message.guild is None:
-            self._logger.debug("Private Message: %s" % filtered_content)
+        # Extra chunck where the bot will reply via keyword or prefix found in CHATTER_PREFIX
+        # Keep in mind this can happen anywhere the bot has access to send messages
+        if message.content.lower().startswith(tuple(CHATTER_PREFIX)):
+            self._logger.debug("Message: %s" % filtered_content)
             self._worker.send(ConnectorRecvMessage(filtered_content))
             reply = self._worker.recv()
             self._logger.debug("Reply: %s" % reply)
             if reply is not None:
-                await message.channel.send(reply)
+                embed = discord.Embed(description=reply, color=message.author.color)
+                embed.set_footer(text = TALKING_VARIANT + message.author.name, icon_url = message.author.avatar_url)
+                embed.timestamp = datetime.utcnow()
+                await asyncio.sleep(0.25)
+                await message.channel.send(embed=embed)
             return
 
+        # Channel which the bot will respond without any prefixes or @mentions
+        elif str(message.channel) in DISCORD_AUTO_TALK and message.content is not None:
+            self._logger.debug("Message: %s" % filtered_content)
+            self._worker.send(ConnectorRecvMessage(filtered_content))
+            reply = self._worker.recv()
+            self._logger.debug("Reply: %s" % reply)
+            if reply is not None:
+                embed = discord.Embed(description=reply, color=message.author.color)
+                embed.set_footer(text = str(TALKING_VARIANT) + message.author.name, icon_url = message.author.avatar_url)
+                embed.timestamp = datetime.utcnow()
+                await asyncio.sleep(0.25)
+                await message.channel.send(embed=embed)
+            return
+
+        # For the bot to reply in private messages, no embeds for private channels
+        elif message.guild is None:
+                self._logger.debug("Private Message: %s" % filtered_content)
+                self._worker.send(ConnectorRecvMessage(filtered_content))
+                reply = self._worker.recv()
+                self._logger.debug("Reply: %s" % reply)
+                if reply is not None:
+                    await asyncio.sleep(0.25)
+                    await message.channel.send(reply)
+                return
 
 class DiscordWorker(ConnectorWorker):
     def __init__(self, read_queue: Queue, write_queue: Queue, shutdown_event: Event,

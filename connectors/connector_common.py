@@ -8,6 +8,7 @@ from queue import Empty
 from spacy.tokens import Doc
 from storage.armchair_expert import InputTextStatManager
 import numpy as np
+import random
 
 
 class ConnectorRecvMessage(object):
@@ -41,7 +42,14 @@ class ConnectorReplyGenerator(object):
             if markov_word is not None:
                 subjects.append(markov_word)
         if len(subjects) == 0:
-            return "I wasn't trained on that!"
+            UNHEARD_LIST = ["Didn’t catch that",
+                                  "Try again",
+                                  "Are you even trying",
+                                  "That might be too much for me right now",
+                                  "I’ll learn how eventually",
+                                  "I don't know how to respond to that yet"]
+            UNHEARD_RESPONSE = random.choice(UNHEARD_LIST)
+            return UNHEARD_RESPONSE
 
         def structure_generator():
             sentence_stats_manager = InputTextStatManager()
@@ -58,7 +66,14 @@ class ConnectorReplyGenerator(object):
         reply_words = []
         sentences = generator.generate(db=self._markov_model)
         if sentences is None:
-            return "Huh?"
+            MISUNDERSTOOD_LIST = ['Huh.',
+                            'Huh',
+                            'Huh!',
+                            'Huh?',
+                            'Huh!?',
+                            'HUH?']
+            MISUNDERSTOOD_REPONSE = random.choice(MISUNDERSTOOD_LIST)
+            return MISUNDERSTOOD_REPONSE
         for sentence in sentences:
             for word_idx, word in enumerate(sentence):
                 if not word.compound:
