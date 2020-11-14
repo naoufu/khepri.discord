@@ -1,0 +1,19 @@
+ignore files
+
+env/*
+__pycache__
+config/*
+!connectors/discord.py
+!config/discord.example.py
+
+connectors/*
+!connectors/discord.py
+db/*
+scripts/*
+storage/*
+weights/*
+*.txt
+
+import_text_file.py
+import_txt.py
+generate_text.py
