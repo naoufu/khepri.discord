@@ -14,28 +14,33 @@
 - Uses a Recurrent Neural Network (RNN) to structure and capitalize the output, mimicking sentence structure and capitalization of learned text
 - Learns new words in real-time with an n-gram markov chain, which is positionally aware of the distances between different words, creating a more coherent sentence
 
-## Requirements
-- 3+ GB of RAM
-- python 3.6+ minimum
-- keras (Tensorflow backend)
-- spaCy 2.0.0+
+## Running your own Installation
+- Any device windows or any linux distro with at least 3 GB of ram
+- Python 3.7 at least
+- If no version is specified, you can run the latest version of the package.
+
+You typically need to install the following requirements:
+- tensorflow-cpu or tensorflow
+- keras(Tensorflow backend)
+- spaCy
 - spacymoji
-- numpy
+- nump==1.16.3
 - tweepy
 - discord.py
 - sqlalchemy
-- tensorflow
 
-## Installation
-*I really recommend you install this in a virtual env, as you will install specific versions of some packages which might conflict on what you have. If not, you can just install it normally.*
-- This was ran under a **Windows** enviroment, so `python` could be `python3` in linux.
+This was ran under a **Windows** enviroment, so `python` could be `python3` in linux.
 **First:** Run the Requirements.txt file in the root folder:
+
+*I really recommend you install this in a virtual env, as you will install specific versions of some packages which might conflict on what you have. If not, you can just install it normally.*
+
+If you run into any issues, just run the command below.
 ```
 pip install -r requirements.txt
 ```
 --------------------------------------------------
 
-### Setup & Training
+### Setup & Training:
 Navigate to the `\armchairexpert\config` folder:
 - Create a copy of armchair_expert.example.py and rename it to armchair_expert.py
 - Create a copy of config/ml.example.py and rename it to config/ml.py
@@ -51,11 +56,11 @@ Navigate to the `\armchairexpert\config` folder:
 To train it with the most recent acquired data, start the bot with the `--retrain-structure flag`. If you are noticing the bot is not generating sentences which the structure of learned material, this will help.
 
 ### Connectors
-#### Discord
+#### Discord:
 - Before you can run the bot, you will need to have a [Discord app](https://discord.com/) account and register a [discord bot](https://discord.com/developers/applications/me#top) to interface with.
 - You can take a look and see a step by step instructions on how to create and add the bot into your server, [Here](https://discordpy.readthedocs.io/en/latest/discord.html).
 
-##### Filling in the discord bot info and configuration
+##### Filling in the discord bot info and configuration:
 - Navigate to the `\armchairexpert\config` folder:
 - Create a copy of discord.example.py and rename it to discord.py
 - Open the discord.py file with your text editor and fill the required fields.

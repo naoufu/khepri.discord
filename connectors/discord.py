@@ -13,6 +13,7 @@ from spacy.tokens import Doc
 from datetime import datetime
 t1 = datetime.now()
 import tensorflow as tf
+import sys
 
 class DiscordReplyGenerator(ConnectorReplyGenerator):
     def generate(self, message: str, doc: Doc = None) -> Optional[str]:
@@ -51,12 +52,15 @@ class DiscordClient(discord.Client):
             % DISCORD_CLIENT_ID)
         print('--------')
         print('--------')
-        print("Discord.py verison: " + discord.__version__)
+        print('Using Python ' + (sys.version))
+        print('--------')
+        print('Using Tensorflow '+ tf.__version__)
         print('--------')
         print("Ready in " + datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
         print('--------')
-        print('Connected to ' + str(self.user.name))
-        print('using Tensorflow '+tf.__version__)
+        print("Discord.py verison: " + discord.__version__)
+        print('--------')
+        print('Connected to ' + str(self.user.name) + '#' + str(self.user.discriminator))
         print('--------')
         print('--------')
 
