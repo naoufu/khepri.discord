@@ -50,18 +50,15 @@ DISCORD_LEARN_FROM_ALL = False
 
 # Don't learn anything from selected user/s
 # This is a username string like, 'SomeDiscordDude#1234'
-#DISCORD_NEGLECT_LEARN = []
-DISCORD_LEARN_NEGLECT_NAME = []
+DISCORD_LEARN_NEGLECT_USERNAMES = []
 # Similar as above but just userID
-#DISCORD_NEGLECT_LEARN = []
-DISCORD_LEARN_NEGLECT_ID = []
+DISCORD_LEARN_NEGLECT_UIDS = []
 
 # Absolutely disable the bot from learning anything with-in the server/s
 # This is done by ignoring the server ID but DOES permit them from interacting
 # I would only have this on, IF "DISCORD_AUTO_TALK" and "DISCORD_LEARN_CHANNEL" names match
 # and "DISCORD_LEARN_FROM_USER" is inside the named server.
-# This is an INT
-DISCORD_LEARN_SERVER_EXCEPTIONS = []
+DISCORD_LEARN_SERVER_ID_EXCEPTIONS = []
 
 # Don't learn from any of these channels
 DISCORD_LEARN_CHANNEL_EXCEPTIONS = []
