@@ -13,6 +13,7 @@ from spacy.tokens import Doc
 from datetime import datetime
 t1 = datetime.now()
 import tensorflow as tf
+import sys
 
 class DiscordReplyGenerator(ConnectorReplyGenerator):
     def generate(self, message: str, doc: Doc = None) -> Optional[str]:
@@ -35,7 +36,6 @@ class DiscordReplyGenerator(ConnectorReplyGenerator):
         else:
             return None
 
-
 class DiscordClient(discord.Client):
 
     def __init__(self, worker: 'DiscordWorker'):
@@ -51,12 +51,15 @@ class DiscordClient(discord.Client):
             % DISCORD_CLIENT_ID)
         print('--------')
         print('--------')
-        print("Discord.py verison: " + discord.__version__)
+        print('Using Python ' + (sys.version))
+        print('--------')
+        print('Using Tensorflow '+ tf.__version__)
         print('--------')
         print("Ready in " + datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
         print('--------')
-        print('Connected to ' + str(self.user.name))
-        print('using Tensorflow '+tf.__version__)
+        print("Discord.py verison: " + discord.__version__)
+        print('--------')
+        print('Connected to ' + str(self.user.name) + '#' + str(self.user.discriminator))
         print('--------')
         print('--------')
 
@@ -75,25 +78,41 @@ class DiscordClient(discord.Client):
 
         learn = False
         # Learn from private messages
-        if message.guild is None and DISCORD_LEARN_FROM_DIRECT_MESSAGE:
-            DiscordTrainingDataManager().store(message)
-            learn = True
-        # Learn from all server messages
-        elif message.guild is not None and DISCORD_LEARN_FROM_ALL:
-            if str(message.channel) not in DISCORD_LEARN_CHANNEL_EXCEPTIONS:
-                DiscordTrainingDataManager().store(message)
-                learn = True
-        # Learn will accept new input from specified channel and neglect specified user
-        elif str(message.channel) in DISCORD_LEARN_CHANNEL and message.content is not None:
-            if str(message.author) in DISCORD_NEGLECT_LEARN:
-                return
-            else:
-                DiscordTrainingDataManager().store(message)
-                learn = True
-        # Learn from Specific User
-        elif str(message.author) == DISCORD_LEARN_FROM_USER:
-            DiscordTrainingDataManager().store(message)
-            learn = True
+        if message.guild is None:
+            # checks for black listed user/s
+            if not str(message.author) in DISCORD_LEARN_NEGLECT_NAME or message.author.id in DISCORD_LEARN_NEGLECT_ID:
+            # if user/s not in list, bot will learn
+                if DISCORD_LEARN_FROM_DIRECT_MESSAGE is True:
+                    DiscordTrainingDataManager().store(message)
+                    learn = True
+
+        # Learn from server
+        elif message.guild is not None:
+
+            DISCORD_LEARN_SERVER_ID_EXCEPTION = list(map(int, DISCORD_LEARN_SERVER_ID_EXCEPTIONS)) # Take note there is an S
+            DISCORD_LEARN_NEGLECT_UID = list(map(int, DISCORD_LEARN_NEGLECT_UIDS))
+
+            # bot will ignore specified server ID's
+            if message.guild.id not in DISCORD_LEARN_SERVER_ID_EXCEPTION:
+
+            # Learn from Specific User
+                if str(message.author) == DISCORD_LEARN_FROM_USER:
+                        DiscordTrainingDataManager().store(message)
+                        learn = True
+
+            # bot will always learn from this channel except from black listed user/s
+                if str(message.channel) in DISCORD_LEARN_CHANNEL and not str(message.author) in DISCORD_LEARN_NEGLECT_USERNAME or message.author.id in DISCORD_LEARN_NEGLECT_UID:
+                    if message.content is not None:
+                        DiscordTrainingDataManager().store(message)
+                        learn = True
+
+            # section where the bot will learn everything
+                if DISCORD_LEARN_FROM_ALL is True:
+            # specify the channel where you do not want the bot to learn from
+                    if str(message.channel) not in DISCORD_LEARN_CHANNEL_EXCEPTIONS:
+                        DiscordTrainingDataManager().store(message)
+                        learn = True
+
         # Real-time learning
         if learn:
             self._worker.send(ConnectorRecvMessage(filtered_content, learn=True, reply=False))
@@ -119,7 +138,7 @@ class DiscordClient(discord.Client):
                 return
 
         # Extra chunck where the bot will reply via keyword or prefix found in CHATTER_PREFIX
-        # Keep in mind this can happen anywhere the bot has access to send messages
+        # Keep in mind this can happen anywhere the bot has access to send messages and embeds
         if message.content.lower().startswith(tuple(CHATTER_PREFIX)):
             self._logger.debug("Message: %s" % filtered_content)
             self._worker.send(ConnectorRecvMessage(filtered_content))

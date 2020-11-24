@@ -17,3 +17,4 @@ weights/*
 import_text_file.py
 import_txt.py
 generate_text.py
+.python-version
