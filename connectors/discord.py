@@ -39,7 +39,7 @@ class DiscordReplyGenerator(ConnectorReplyGenerator):
 class DiscordClient(discord.Client):
 
     def __init__(self, worker: 'DiscordWorker'):
-        discord.Client.__init__(self, activity=discord.Game(name="My reality", type=3), status=discord.Status.dnd)
+        discord.Client.__init__(self, activity=discord.Game(name="Making your reality, my reality", type=3), status=discord.Status.dnd)
         self._worker = worker
         self._ready.set()
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -59,7 +59,7 @@ class DiscordClient(discord.Client):
         print('--------')
         print("Discord.py verison: " + discord.__version__)
         print('--------')
-        print('Connected to ' + str(self.user.name) + '#' + str(self.user.discriminator))
+        print('Connected to ' + str(self.user.name) + '#' + str(self.user.discriminator) + '\nDeployed in ' + str(len(self.guilds))+' servers')
         print('--------')
         print('--------')
 
@@ -84,7 +84,7 @@ class DiscordClient(discord.Client):
 
         if message.guild is None:
             # checks for black listed user/s
-            if not str(message.author) in DISCORD_LEARN_NEGLECT_USERNAMES or message.author.id in DISCORD_LEARN_NEGLECT_ID:
+            if not str(message.author) in DISCORD_LEARN_NEGLECT_USERNAMES or message.author.id in DISCORD_LEARN_NEGLECT_UID:
             # if user/s not in list, bot will learn
                 if DISCORD_LEARN_FROM_DIRECT_MESSAGE is True:
                     DiscordTrainingDataManager().store(message)
