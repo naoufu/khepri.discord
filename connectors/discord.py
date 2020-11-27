@@ -78,9 +78,13 @@ class DiscordClient(discord.Client):
 
         learn = False
         # Learn from private messages
+
+        DISCORD_LEARN_SERVER_ID_EXCEPTION = list(map(int, DISCORD_LEARN_SERVER_ID_EXCEPTIONS)) # Take note there is an S
+        DISCORD_LEARN_NEGLECT_UID = list(map(int, DISCORD_LEARN_NEGLECT_UIDS))
+
         if message.guild is None:
             # checks for black listed user/s
-            if not str(message.author) in DISCORD_LEARN_NEGLECT_NAME or message.author.id in DISCORD_LEARN_NEGLECT_ID:
+            if not str(message.author) in DISCORD_LEARN_NEGLECT_USERNAMES or message.author.id in DISCORD_LEARN_NEGLECT_ID:
             # if user/s not in list, bot will learn
                 if DISCORD_LEARN_FROM_DIRECT_MESSAGE is True:
                     DiscordTrainingDataManager().store(message)
@@ -88,10 +92,6 @@ class DiscordClient(discord.Client):
 
         # Learn from server
         elif message.guild is not None:
-
-            DISCORD_LEARN_SERVER_ID_EXCEPTION = list(map(int, DISCORD_LEARN_SERVER_ID_EXCEPTIONS)) # Take note there is an S
-            DISCORD_LEARN_NEGLECT_UID = list(map(int, DISCORD_LEARN_NEGLECT_UIDS))
-
             # bot will ignore specified server ID's
             if message.guild.id not in DISCORD_LEARN_SERVER_ID_EXCEPTION:
 
