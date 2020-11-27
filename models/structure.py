@@ -118,7 +118,7 @@ class StructureModel(object):
         self.model = model
 
         if use_gpu:
-            config = tf.ConfigProto()
+            config = tf.compat.v1.ConfigProto()
             config.gpu_options.allow_growth = True
             set_session(tf.Session(config=config))
 

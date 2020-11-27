@@ -154,6 +154,9 @@ class AOLReactionModel(object):
         from keras.models import Sequential
         from keras.layers import Dense
         from keras.backend import set_session
+        from tf.keras.models import Sequential
+        from tf.keras.layers import Dense
+        from tf.keras.backend import set_session
 
         self.model = Sequential()
         self.model.add(Dense(AOLReactionFeatureAnalyzer.NUM_FEATURES, activation='relu',
@@ -165,12 +168,11 @@ class AOLReactionModel(object):
                            metrics=['accuracy'])
 
         if use_gpu:
-            config = tf.ConfigProto()
+            config = tf.compat.v1.ConfigProto()
             config.gpu_options.allow_growth = True
             set_session(tf.Session(config=config))
 
     def train(self, data, labels, epochs=1):
-        self.model.fit(np.array(data), np.array(labels), epochs=epochs, batch_size=32)
 
     def predict(self, text: str):
         features = np.array([AOLReactionFeatureAnalyzer.analyze(text)])
