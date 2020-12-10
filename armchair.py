@@ -16,7 +16,7 @@ from storage.imported import ImportTrainingDataManager
 
 @unique
 class AEStatus(Enum):
-    INITIALIZING = 1
+    INITIALISING = 1
     OPERATIONAL = 2
     SHUTTING_DOWN = 3
     SHUTDOWN = 4
@@ -41,7 +41,7 @@ class ArmchairExpert(object):
 
     def start(self, retrain_structure: bool = False, retrain_markov: bool = False):
 
-        self._set_status(AEStatus.INITIALIZING)
+        self._set_status(AEStatus.INITIALISING)
 
         # Initialize backends and models
         self._markov_model = MarkovTrieDb()
