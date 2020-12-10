@@ -1,7 +1,8 @@
 class DiscordApiCredentials(object):
     def __init__(self, token: str):
         self.token = token
-
+# YOU CAN CHECK THE WIKI #
+# https://github.com/naoufu/khepri.discord/wiki/Configuration # 
 
 # ----------DISCORD TOKEN SECTION----------
 # -----------------------------------------
