@@ -24,7 +24,7 @@ You typically need to install the following requirements:
 - keras(Tensorflow backend)
 - spaCy
 - spacymoji
-- nump==1.16.3
+- numpy==1.16.3
 - tweepy
 - discord.py
 - sqlalchemy
@@ -60,7 +60,8 @@ To train it with the most recent acquired data, start the bot with the `--retrai
 - Before you can run the bot, you will need to have a [Discord app](https://discord.com/) account and register a [discord bot](https://discord.com/developers/applications/me#top) to interface with.
 - You can take a look and see a step by step instructions on how to create and add the bot into your server, [Here](https://discordpy.readthedocs.io/en/latest/discord.html).
 
-##### Filling in the discord bot info and configuration:
+#### Filling in the discord bot info and configuration:
+*The following configuration is enough to make the bot running. To configure and refine how the bot learns, you need to check the [Wiki](https://github.com/naoufu/khepri.discord/wiki) for additional info and explainations.*
 - Navigate to the `\armchairexpert\config` folder:
 - Create a copy of discord.example.py and rename it to discord.py
 - Open the discord.py file with your text editor and fill the required fields.
