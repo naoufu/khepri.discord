@@ -5,6 +5,7 @@ import discord
 import logging
 from discord.ext import commands
 from config.discord import *
+from config.langcheck import *
 from connectors.connector_common import *
 from storage.discord import DiscordTrainingDataManager
 from common.discord import DiscordHelper
@@ -74,6 +75,11 @@ class DiscordClient(discord.Client):
         if not len(filtered_content) > 2:
             return
         if filtered_content == '':
+            return
+
+        lang_check = detectlanguage.simple_detect(filtered_content) # Checks if the message is english or not
+        lang_es = 'en'
+        if lang_check != lang_es:
             return
 
         learn = False
